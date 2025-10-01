@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEDSEC CTF Challenge Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo" onclick="showSection('home')">
+                <i class="fas fa-user-secret"></i>
+                DEDSEC CTF
+            </a>
+            <nav class="nav">
+                <a href="#" class="nav-link" onclick="showSection('home')">Home</a>
+                <a href="#" class="nav-link" onclick="showSection('challenges')">Challenges</a>
+                <a href="#" class="nav-link" onclick="showSection('help')">Help</a>
+                <a href="#" class="nav-link" id="login-nav" onclick="showSection('login')">Login</a>
+                <a href="#" class="nav-link" id="register-nav" onclick="showSection('register')">Register</a>
+                <a href="#" class="nav-link" id="logout-nav" style="display: none;" onclick="logout()">Logout</a>
+                <a href="#" class="nav-link" id="admin-nav" style="display: none;" onclick="showSection('admin')">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Login Section -->
+        <section class="section" id="login-section">
+            <div class="login-container">
+                <h2 class="login-title">Login to DEDSEC CTF</h2>
+                <form class="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="login-btn" id="login-btn">Login</button>
+                </form>
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="#" onclick="showSection('register')">Register here</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Registration Section -->
+        <section class="section" id="register-section">
+            <div class="register-container">
+                <h2 class="register-title">Create an Account</h2>
+                <form class="register-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="reg-name" class="form-label">Full Name</label>
+                        <input type="text" id="reg-name" class="form-input" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email" class="form-label">Email</label>
+                        <input type="email" id="reg-email" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password" class="form-label">Password</label>
+                        <input type="password" id="reg-password" class="form-input" placeholder="Create a password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-confirm-password" class="form-label">Confirm Password</label>
+                        <input type="password" id="reg-confirm-password" class="form-input" placeholder="Confirm your password" required>
+                    </div>
+                    <button type="submit" class="register-btn" id="register-btn">Register</button>
+                </form>
+                <div class="form-footer">
+                    <p>Already have an account? <a href="#" onclick="showSection('login')">Login here</a></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Home Section -->
+        <section class="section active" id="home-section">
+            <div class="home-content">
+                <section class="hero">
+                    <h1 class="hero-title">Capture The Flag Challenges</h1>
+                    <p class="hero-subtitle">Test your cybersecurity skills with our collection of challenges across multiple domains. Find flags, hack systems, and develop your skills.</p>
+                </section>
+
+                <div class="info-section">
+                    <h2 class="info-title">What is CTF?</h2>
+                    <p class="info-text">
+                        Capture The Flag (CTF) is a cybersecurity competition where participants solve challenges to find flags—hidden pieces of data that prove they've completed the challenge. These competitions help develop real-world cybersecurity skills in a fun, competitive environment.
+                    </p>
+                    <p class="info-text">
+                        CTFs typically include challenges from various domains like cryptography, reverse engineering, web exploitation, forensics, and more. Each category tests different aspects of cybersecurity knowledge and skills.
+                    </p>
+                    
+                    <h2 class="info-title" style="margin-top: 32px;">Challenge Categories</h2>
+                    <div class="domain-grid">
+                        <div class="domain-card">
+                            <div class="domain-icon" style="color: var(--crypto);">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h3 class="domain-title">Cryptography</h3>
+                            <p class="domain-description">Decrypt encrypted messages, break ciphers, and uncover hidden information using cryptographic techniques.</p>
+                        </div>
+                        
+                        <div class="domain-card">
+                            <div class="domain-icon" style="color: var(--reverse);">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <h3 class="domain-title">Reverse Engineering</h3>
+                            <p class="domain-description">Analyze compiled programs to understand their functionality and extract hidden flags from binary files.</p>
+                        </div>
+                        
+                        <div class="domain-card">
+                            <div class="domain-icon" style="color: var(--web);">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3 class="domain-title">Web Exploitation</h3>
+                            <p class="domain-description">Find and exploit vulnerabilities in web applications to access restricted data or functionality.</p>
+                        </div>
+                        
+                        <div class="domain-card">
+                            <div class="domain-icon" style="color: var(--forensics);">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3 class="domain-title">Forensics</h3>
+                            <p class="domain-description">Analyze digital artifacts, network traffic, and file metadata to uncover hidden flags and information.</p>
+                        </div>
+                        
+                        <div class="domain-card">
+                            <div class="domain-icon" style="color: var(--misc);">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3 class="domain-title">Binary Exploitation</h3>
+                            <p class="domain-description">Tackle unique challenges that don't fit neatly into other categories, testing your overall problem-solving skills.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="#" class="cta-button" onclick="showSection('challenges')">Get Started with Challenges</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Challenges Section -->
+        <section class="section" id="challenges-section">
+            <div class="dashboard">
+                <aside class="sidebar">
+                    <h2 class="sidebar-title">Categories</h2>
+                    <ul class="category-list">
+                        <li class="category-item">
+                            <a href="#" class="category-link crypto active" data-category="crypto">
+                                <i class="fas fa-lock"></i>
+                                Cryptography
+                            </a>
+                        </li>
+                        <li class="category-item">
+                            <a href="#" class="category-link reverse" data-category="reverse">
+                                <i class="fas fa-microchip"></i>
+                                Reverse Engineering
+                            </a>
+                        </li>
+                        <li class="category-item">
+                            <a href="#" class="category-link web" data-category="web">
+                                <i class="fas fa-code"></i>
+                                Web Exploitation
+                            </a>
+                        </li>
+                        <li class="category-item">
+                            <a href="#" class="category-link forensics" data-category="forensics">
+                                <i class="fas fa-search"></i>
+                                Forensics
+                            </a>
+                        </li>
+                        <li class="category-item">
+                            <a href="#" class="category-link misc" data-category="misc">
+                                <i class="fas fa-star"></i>
+                                Binary Exploitation
+                            </a>
+                        </li>
+                    </ul>
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                        <button class="reset-btn" onclick="resetProgress()">
+                            <i class="fas fa-trash-alt"></i> Reset Progress
+                        </button>
+                    </div>
+                </aside>
+
+                <div class="content">
+                    <section class="section">
+                        <div class="section-header">
+                            <h2 class="section-title">Your Progress</h2>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="total-solved">0</div>
+                                <div class="stat-label">Challenges Solved</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="crypto-solved">0</div>
+                                <div class="stat-label">Cryptography</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="reverse-solved">0</div>
+                                <div class="stat-label">Reverse Engineering</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="web-solved">0</div>
+                                <div class="stat-label">Web Exploitation</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="forensics-solved">0</div>
+                                <div class="stat-label">Forensics</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="misc-solved">0</div>
+                                <div class="stat-label">Binary Exploitation</div>
+                            </div>
+                        </div>
+                    </section>
+
+                   <section class="section active" id="crypto-section">
+    <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-lock"></i> Cryptography Challenges</h2>
+    </div>
+    <div class="challenge-grid" id="crypto-challenges">
+        <div class="challenge-card crypto-challenge" id="challenge-julius">
+            <div class="challenge-header">
+                <div>
+                    <h3 class="challenge-title">Julius Would Be Proud</h3>
+                    <span class="challenge-difficulty difficulty-easy">Easy Peasy</span>
+                </div>
+                <span class="challenge-status status-unsolved">Unsolved</span>
+            </div>
+            <p class="challenge-description">
+                Oh, look what we have here! Another wannabe hacker who thinks they're clever by using ancient techniques. We found this message on a sticky note attached to a server. It's probably the password to the admin account. Decode it and prove how "secure" this is.
+            </p>
+            <div class="challenge-hint">
+                <strong>Hint:</strong> It's so easy, even a Roman emperor could crack it. Remember, only the part inside the parentheses is encoded.
+            </div>
+            <p><strong>Message:</strong> <code>dedSEC(hdvb_shdvb)</code></p>
+            <form class="flag-form" onsubmit="validateFlag(event, 'dedSEC(easy_peasy)', 'crypto', 'challenge-julius')">
+                <input type="text" class="flag-input" placeholder="Enter flag: dedSEC(...)" required>
+                <button type="submit" class="submit-btn">Submit Flag</button>
+            </form>
+        </div>
+
+        <div class="challenge-card crypto-challenge" id="challenge-xor">
+            <div class="challenge-header">
+                <div>
+                    <h3 class="challenge-title">Exclusive Or What?</h3>
+                    <span class="challenge-difficulty difficulty-medium">Medium</span>
+                </div>
+                <span class="challenge-status status-unsolved">Unsolved</span>
+            </div>
+            <p class="challenge-description">
+                Wow, someone actually thought XOR encryption was a good idea? How original. We intercepted this message from a chat room where they were discussing their "super secret" plan. The key is supposedly 'key'. Good luck figuring out what that means. You might need to XOR yourself out of this one.
+            </p>
+            <div class="hint-revealer" onclick="toggleHint(this)">
+                <div class="hint-title">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Click to reveal hint</span>
+                </div>
+                <div class="hint-content">
+                    The most common byte in English text is the space character (0x20). Try XORing the ciphertext with different keys and look for the one that produces the most spaces.
+                </div>
+            </div>
+            <a href="#" class="download-link">
+                <i class="fas fa-download"></i>
+                Download Challenge File
+            </a>
+            <form class="flag-form" onsubmit="validateFlag(event, 'dedSEC(xor_is_fun)', 'crypto', 'challenge-xor')">
+                <input type="text" class="flag-input" placeholder="Enter flag: dedSEC(...)" required>
+                <button type="submit" class="submit-btn">Submit Flag</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+                    <section class="section" id="reverse-section">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fas fa-microchip"></i> Reverse Engineering Challenges</h2>
+                        </div>
+                        <div class="challenge-grid" id="reverse-challenges">
+                            <div class="challenge-card reverse-challenge" id="challenge-crackme">
+                                <div class="challenge-header">
+                                    <div>
+                                        <h3 class="challenge-title">Crack Me If You Can</h3>
+                                        <span class="challenge-difficulty difficulty-easy">Easy</span>
+                                    </div>
+                                    <span class="challenge-status status-unsolved">Unsolved</span>
+                                </div>
+                                <p class="challenge-description">
+                                    We found this suspicious binary on a compromised system. It seems to be asking for a password. Can you figure out what the correct password is and extract the flag?
+                                </p>
+                                <div class="hint-revealer" onclick="toggleHint(this)">
+                                    <div class="hint-title">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <span>Show Hint</span>
+                                    </div>
+                                    <div class="hint-content">
+                                        Try using a disassembler like IDA or Ghidra to analyze the binary. Look for string comparisons or password validation routines.
+                                    </div>
+                                </div>
+                                <a href="#" class="download-link">
+                                    <i class="fas fa-download"></i>
+                                    Download Binary
+                                </a>
+                                <form class="flag-form" onsubmit="validateFlag(event, 'dedSEC{reverse_me}', 'reverse', 'challenge-crackme')">
+                                    <input type="text" class="flag-input" placeholder="Enter flag: dedSEC{...}" required>
+                                    <button type="submit" class="submit-btn">Submit Flag</button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="section" id="web-section">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fas fa-code"></i> Web Exploitation Challenges</h2>
+                        </div>
+                        <div class="challenge-grid" id="web-challenges">
+                            <div class="challenge-card web-challenge" id="challenge-sqli">
+                                <div class="challenge-header">
+                                    <div>
+                                        <h3 class="challenge-title">Little Bobby Tables</h3>
+                                        <span class="challenge-difficulty difficulty-medium">Medium</span>
+                                    </div>
+                                    <span class="challenge-status status-unsolved">Unsolved</span>
+                                </div>
+                                <p class="challenge-description">
+                                    We've discovered a login portal that seems vulnerable to SQL injection. Bypass the authentication and retrieve the flag from the database.
+                                </p>
+                                <div class="hint-revealer" onclick="toggleHint(this)">
+                                    <div class="hint-title">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <span>Show Hint</span>
+                                    </div>
+                                    <div class="hint-content">
+                                        Try using a classic SQL injection payload like ' OR '1'='1 in the username field. You might need to comment out the rest of the query.
+                                    </div>
+                                </div>
+                                <a href="#" class="download-link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    Access Web Portal
+                                </a>
+                                <form class="flag-form" onsubmit="validateFlag(event, 'dedSEC{sql_injection}', 'web', 'challenge-sqli')">
+                                    <input type="text" class="flag-input" placeholder="Enter flag: dedSEC{...}" required>
+                                    <button type="submit" class="submit-btn">Submit Flag</button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="section" id="forensics-section">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fas fa-search"></i> Forensics Challenges</h2>
+                        </div>
+                        <div class="challenge-grid" id="forensics-challenges">
+                            <div class="challenge-card forensics-challenge" id="challenge-pcap">
+                                <div class="challenge-header">
+                                    <div>
+                                        <h3 class="challenge-title">Packet Sniffing</h3>
+                                        <span class="challenge-difficulty difficulty-medium">Medium</span>
+                                    </div>
+                                    <span class="challenge-status status-unsolved">Unsolved</span>
+                                </div>
+                                <p class="challenge-description">
+                                    We captured this network traffic during a suspected data exfiltration attempt. Can you find what data was being exfiltrated and recover the flag?
+                                </p>
+                                <div class="hint-revealer" onclick="toggleHint(this)">
+                                    <div class="hint-title">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <span>Show Hint</span>
+                                    </div>
+                                    <div class="hint-content">
+                                        Look for unusual protocols or data patterns. The flag might be hidden in DNS queries or HTTP requests.
+                                    </div>
+                                </div>
+                                <a href="#" class="download-link">
+                                    <i class="fas fa-download"></i>
+                                    Download PCAP File
+                                </a>
+                                <form class="flag-form" onsubmit="validateFlag(event, 'dedSEC{packet_inspection}', 'forensics', 'challenge-pcap')">
+                                    <input type="text" class="flag-input" placeholder="Enter flag: dedSEC{...}" required>
+                                    <button type="submit" class="submit-btn">Submit Flag</button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="section" id="misc-section">
+                        <div class="section-header">
+                            <h2 class="section-title"><i class="fas fa-star"></i> Binary Exploitation Challenges</h2>
+                        </div>
+                        <div class="challenge-grid" id="misc-challenges">
+                            <div class="challenge-card misc-challenge" id="challenge-stego">
+                                <div class="challenge-header">
+                                    <div>
+                                        <h3 class="challenge-title">Hidden in Plain Sight</h3>
+                                        <span class="challenge-difficulty difficulty-easy">Easy</span>
+                                    </div>
+                                    <span class="challenge-status status-unsolved">Unsolved</span>
+                                </div>
+                                <p class="challenge-description">
+                                    Our suspect claims this is just a normal image of a cat. We think there's something hidden in it. Can you find the secret message?
+                                </p>
+                                <div class="hint-revealer" onclick="toggleHint(this)">
+                                    <div class="hint-title">
+                                        <i class="fas fa-lightbulb"></i>
+                                        <span>Show Hint</span>
+                                    </div>
+                                    <div class="hint-content">
+                                        Try using a tool like steghide or binwalk to extract hidden data from the image. The password might be simple.
+                                    </div>
+                                </div>
+                                <a href="#" class="download-link">
+                                    <i class="fas fa-download"></i>
+                                    Download Image
+                                </a>
+                                <form class="flag-form" onsubmit="validateFlag(event, 'dedSEC{steganography}', 'misc', 'challenge-stego')">
+                                    <input type="text" class="flag-input" placeholder="Enter flag: dedSEC{...}" required>
+                                    <button type="submit" class="submit-btn">Submit Flag</button>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Section -->
+        <section class="section" id="admin-section">
+            <div class="section-header">
+                <h2 class="section-title">Admin Panel</h2>
+            </div>
+            
+            <div class="admin-controls">
+                <h3 class="admin-title">Add New Challenge</h3>
+                <form class="admin-form" onsubmit="addChallenge(event)">
+                    <div class="form-group">
+                        <label for="challenge-title" class="form-label">Challenge Title</label>
+                        <input type="text" id="challenge-title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="challenge-creator" class="form-label">Creator Name</label>
+                        <input type="text" id="challenge-creator" class="form-input" placeholder="Enter creator name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="challenge-category" class="form-label">Category</label>
+                        <select id="challenge-category" class="form-input" required>
+                            <option value="crypto">Cryptography</option>
+                            <option value="reverse">Reverse Engineering</option>
+                            <option value="web">Web Exploitation</option>
+                            <option value="forensics">Forensics</option>
+                            <option value="misc">Binary Exploitation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="challenge-difficulty" class="form-label">Difficulty</label>
+                        <select id="challenge-difficulty" class="form-input" required>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="challenge-description" class="form-label">Description</label>
+                        <textarea id="challenge-description" class="form-input" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="challenge-hint" class="form-label">Hint</label>
+                        <textarea id="challenge-hint" class="form-input" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="challenge-flag" class="form-label">Flag</label>
+                        <input type="text" id="challenge-flag" class="form-input" placeholder="dedSEC{...}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="challenge-file-link" class="form-label">File Link (optional)</label>
+                        <input type="url" id="challenge-file-link" class="form-input" placeholder="https://example.com/challenge.zip">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="add-challenge-btn">Add Challenge</button>
+                    </div>
+                </form>
+                
+                <h3 class="admin-title">Remove Challenge</h3>
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label for="remove-challenge" class="form-label">Select Challenge to Remove</label>
+                        <select id="remove-challenge" class="form-input">
+                            <option value="">-- Select Challenge --</option>
+                            <!-- Challenges will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-danger" onclick="removeChallenge()">Remove Challenge</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Help Section -->
+        <section class="section" id="help-section">
+            <div class="info-section">
+                <h2 class="info-title">CTF Help & Resources</h2>
+                <p class="info-text">
+                    If you're new to Capture The Flag competitions, here are some resources to help you get started:
+                </p>
+                
+                <h3 class="info-title" style="margin-top: 24px; font-size: 20px;">General Tips</h3>
+                <ul style="margin-left: 20px; margin-bottom: 24px;">
+                    <li>Always read the challenge description carefully. Clues are often hidden in plain sight.</li>
+                    <li>Start with the easier challenges to build confidence and understand the format.</li>
+                    <li>Don't get stuck on one challenge for too long. Move on and come back later with fresh eyes.</li>
+                    <li>Flags are always in the format <code>dedSEC{...}</code>. Make sure to include the entire string when submitting.</li>
+                </ul>
+                
+                <h3 class="info-title" style="margin-top: 24px; font-size: 20px;">Tool Recommendations</h3>
+                <div class="domain-grid">
+                    <div class="domain-card">
+                        <h3 class="domain-title">Cryptography</h3>
+                        <p class="domain-description">CyberChef, Cryptool, Python with cryptography libraries</p>
+                    </div>
+                    
+                    <div class="domain-card">
+                        <h3 class="domain-title">Reverse Engineering</h3>
+                        <p class="domain-description">Ghidra, IDA Pro, Radare2, Binary Ninja</p>
+                    </div>
+                    
+                    <div class="domain-card">
+                        <h3 class="domain-title">Web Exploitation</h3>
+                        <p class="domain-description">Burp Suite, OWASP ZAP, Browser Developer Tools</p>
+                    </div>
+                    
+                    <div class="domain-card">
+                        <h3 class="domain-title">Forensics</h3>
+                        <p class="domain-description">Wireshark, Autopsy, Binwalk, Steghide</p>
+                    </div>
+                </div>
+                
+                <h3 class="info-title" style="margin-top: 24px; font-size: 20px;">Learning Resources</h3>
+                <ul style="margin-left: 20px;">
+                    <li><a href="#" style="color: var(--accent);">CTF Field Guide</a> - Comprehensive guide to getting started with CTFs</li>
+                    <li><a href="#" style="color: var(--accent);">OverTheWire</a> - War games to practice security concepts</li>
+                    <li><a href="#" style="color: var(--accent);">PicoCTF</a> - Beginner-friendly CTF challenges</li>
+                    <li><a href="#" style="color: var(--accent);">CTFtime</a> - Schedule of upcoming CTF events</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <footer class="footer">
+        <p>DEDSEC CTF Challenge Platform &copy; 2023. All rights reserved.</p>
+        <p>This platform is for educational purposes only.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
