@@ -1,172 +1,262 @@
-// Toggle hint visibility
-function toggleHint(element) {
-    const hintContent = element.querySelector('.hint-content');
-    hintContent.classList.toggle('revealed');
-    
-    const hintTitle = element.querySelector('.hint-title span');
-    hintTitle.textContent = hintContent.classList.contains('revealed') ? 'Hide Hint' : 'Show Hint';
+// Admin credentials
+const ADMIN_EMAIL = "admin@dedsec.com";
+const ADMIN_PASSWORD = "admin123";
+
+// Enhanced admin functions
+function isAdmin() {
+    const userEmail = localStorage.getItem('userEmail');
+    return userEmail === ADMIN_EMAIL;
 }
 
-// Validate flag submission
-function validateFlag(event, correctFlag, category, challengeId) {
+function handleChallengeSubmit(event) {
     event.preventDefault();
     
-    const form = event.target;
-    const input = form.querySelector('.flag-input');
-    const button = form.querySelector('.submit-btn');
-    const status = form.closest('.challenge-card').querySelector('.challenge-status');
+    if (!isAdmin()) {
+        showNotification('Access denied. Admin privileges required.', 'error');
+        return;
+    }
     
-    const userFlag = input.value.trim();
+    const challengeId = document.getElementById('challenge-id').value;
+    const title = document.getElementById('challenge-title').value;
+    const category = document.getElementById('challenge-category').value;
+    const creator = document.getElementById('challenge-creator').value;
+    const difficulty = document.getElementById('challenge-difficulty').value;
+    const description = document.getElementById('challenge-description').value;
+    const hint = document.getElementById('challenge-hint').value;
+    const flag = document.getElementById('challenge-flag').value;
+    const fileLink = document.getElementById('challenge-file-link').value;
+    const submitBtn = document.getElementById('submit-challenge-btn');
     
-    if (userFlag === correctFlag) {
-        // Correct flag
-        showNotification('Correct flag! Challenge solved!', 'success');
-        status.textContent = 'Solved';
-        status.classList.remove('status-unsolved');
-        status.classList.add('status-solved');
+    // Show loading state
+    submitBtn.innerHTML = '<span class="loading"></span> Saving...';
+    submitBtn.disabled = true;
+    
+    setTimeout(() => {
+        const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
         
-        button.textContent = 'Solved';
-        button.classList.add('solved');
-        button.disabled = true;
-        
-        // Save solved challenge to Firebase
-        if (currentUser) {
-            const userProgressRef = database.ref('userProgress/' + currentUser.uid + '/' + challengeId);
-            userProgressRef.set({
-                solved: true,
-                category: category,
-                timestamp: new Date().toISOString()
-            });
+        if (challengeId) {
+            // Update existing challenge
+            challenges[challengeId] = {
+                ...challenges[challengeId],
+                title,
+                category,
+                difficulty,
+                description,
+                hint,
+                flag,
+                fileLink,
+                creator,
+                updatedAt: new Date().toISOString()
+            };
+            showNotification('Challenge updated successfully!', 'success');
+        } else {
+            // Create new challenge
+            const newChallengeId = 'challenge-' + Date.now();
+            challenges[newChallengeId] = {
+                title,
+                category,
+                difficulty,
+                description,
+                hint,
+                flag,
+                fileLink,
+                creator,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            showNotification('Challenge added successfully!', 'success');
         }
         
-        // Update stats
-        updateStats();
-    } else {
-        // Incorrect flag
-        showNotification('Incorrect flag. Try again!', 'error');
-        input.value = '';
-        input.focus();
+        localStorage.setItem('challenges', JSON.stringify(challenges));
+        
+        // Reset form and UI
+        submitBtn.innerHTML = 'Add Challenge';
+        submitBtn.disabled = false;
+        document.getElementById('form-title').textContent = 'Add New Challenge';
+        document.getElementById('cancel-edit-btn').style.display = 'none';
+        document.getElementById('challenge-id').value = '';
+        event.target.reset();
+        
+        // Refresh admin lists
+        loadAdminChallenges();
+        updateAdminStats();
+        if (window.location.pathname.includes('challenges.html')) {
+            loadChallenges();
+        }
+    }, 1000);
+}
+
+function editChallenge(challengeId) {
+    if (!isAdmin()) {
+        showNotification('Access denied. Admin privileges required.', 'error');
+        return;
+    }
+    
+    const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+    const challenge = challenges[challengeId];
+    
+    if (challenge) {
+        // Populate form with challenge data
+        document.getElementById('challenge-id').value = challengeId;
+        document.getElementById('challenge-title').value = challenge.title;
+        document.getElementById('challenge-creator').value = challenge.creator;
+        document.getElementById('challenge-category').value = challenge.category;
+        document.getElementById('challenge-difficulty').value = challenge.difficulty;
+        document.getElementById('challenge-description').value = challenge.description;
+        document.getElementById('challenge-hint').value = challenge.hint || '';
+        document.getElementById('challenge-flag').value = challenge.flag;
+        document.getElementById('challenge-file-link').value = challenge.fileLink || '';
+        
+        // Update UI for edit mode
+        document.getElementById('form-title').textContent = 'Edit Challenge';
+        document.getElementById('submit-challenge-btn').textContent = 'Update Challenge';
+        document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+        
+        // Scroll to form
+        document.getElementById('challenge-form').scrollIntoView({ behavior: 'smooth' });
     }
 }
 
-// Load solved challenges and update UI
-function loadSolvedChallenges() {
-    if (!currentUser) return;
+function cancelEdit() {
+    document.getElementById('challenge-form').reset();
+    document.getElementById('challenge-id').value = '';
+    document.getElementById('form-title').textContent = 'Add New Challenge';
+    document.getElementById('submit-challenge-btn').textContent = 'Add Challenge';
+    document.getElementById('cancel-edit-btn').style.display = 'none';
+}
+
+function clearForm() {
+    if (confirm('Are you sure you want to clear the form?')) {
+        cancelEdit();
+    }
+}
+
+function deleteChallenge(challengeId) {
+    if (!isAdmin()) {
+        showNotification('Access denied. Admin privileges required.', 'error');
+        return;
+    }
     
-    const userProgressRef = database.ref('userProgress/' + currentUser.uid);
-    userProgressRef.once('value')
-        .then(snapshot => {
-            const solvedChallenges = snapshot.val() || {};
-            
-            for (const [challengeId, data] of Object.entries(solvedChallenges)) {
-                const challengeElement = document.getElementById(challengeId);
-                if (challengeElement && data.solved) {
-                    const status = challengeElement.querySelector('.challenge-status');
-                    const button = challengeElement.querySelector('.submit-btn');
-                    const form = challengeElement.querySelector('.flag-form');
-                    
-                    if (status) {
-                        status.textContent = 'Solved';
-                        status.classList.remove('status-unsolved');
-                        status.classList.add('status-solved');
-                    }
-                    
-                    if (button) {
-                        button.textContent = 'Solved';
-                        button.classList.add('solved');
-                        button.disabled = true;
-                    }
-                    
-                    if (form) {
-                        const input = form.querySelector('.flag-input');
-                        if (input) {
-                            input.disabled = true;
-                        }
-                    }
-                }
-            }
-            
+    if (confirm('Are you sure you want to delete this challenge? This action cannot be undone.')) {
+        const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+        delete challenges[challengeId];
+        localStorage.setItem('challenges', JSON.stringify(challenges));
+        
+        showNotification('Challenge deleted successfully!', 'success');
+        loadAdminChallenges();
+        updateAdminStats();
+        
+        // Also remove from solved challenges
+        const solvedChallenges = JSON.parse(localStorage.getItem('solvedChallenges')) || {};
+        delete solvedChallenges[challengeId];
+        localStorage.setItem('solvedChallenges', JSON.stringify(solvedChallenges));
+        
+        if (window.location.pathname.includes('challenges.html')) {
+            loadChallenges();
             updateStats();
-        })
-        .catch(error => {
-            console.error('Error loading solved challenges:', error);
-            showNotification('Error loading your progress', 'error');
-        });
-}
-
-// Update statistics
-function updateStats() {
-    if (!currentUser) return;
-    
-    const userProgressRef = database.ref('userProgress/' + currentUser.uid);
-    userProgressRef.once('value')
-        .then(snapshot => {
-            const solvedChallenges = snapshot.val() || {};
-            
-            let total = 0;
-            let crypto = 0;
-            let reverse = 0;
-            let web = 0;
-            let forensics = 0;
-            let misc = 0;
-            
-            for (const challenge of Object.values(solvedChallenges)) {
-                if (challenge.solved) {
-                    total++;
-                    
-                    switch (challenge.category) {
-                        case 'crypto':
-                            crypto++;
-                            break;
-                        case 'reverse':
-                            reverse++;
-                            break;
-                        case 'web':
-                            web++;
-                            break;
-                        case 'forensics':
-                            forensics++;
-                            break;
-                        case 'misc':
-                            misc++;
-                            break;
-                    }
-                }
-            }
-            
-            document.getElementById('total-solved').textContent = total;
-            document.getElementById('crypto-solved').textContent = crypto;
-            document.getElementById('reverse-solved').textContent = reverse;
-            document.getElementById('web-solved').textContent = web;
-            document.getElementById('forensics-solved').textContent = forensics;
-            document.getElementById('misc-solved').textContent = misc;
-        })
-        .catch(error => {
-            console.error('Error updating stats:', error);
-        });
-}
-
-// Reset progress
-function resetProgress() {
-    if (confirm('Are you sure you want to reset all your progress? This cannot be undone.')) {
-        if (currentUser) {
-            const userProgressRef = database.ref('userProgress/' + currentUser.uid);
-            userProgressRef.remove()
-                .then(() => {
-                    showNotification('Progress has been reset', 'success');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                })
-                .catch(error => {
-                    console.error('Error resetting progress:', error);
-                    showNotification('Error resetting progress', 'error');
-                });
         }
     }
 }
 
-// Handle login with Firebase Auth
+function loadAdminChallenges() {
+    if (!document.getElementById('admin-challenges-list')) return;
+    
+    const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+    const challengesList = document.getElementById('admin-challenges-list');
+    const searchTerm = document.getElementById('search-challenges').value.toLowerCase();
+    const filterCategory = document.getElementById('filter-category').value;
+    
+    if (Object.keys(challenges).length === 0) {
+        challengesList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <div class="empty-text">No challenges found. Create your first challenge above!</div>
+            </div>
+        `;
+        return;
+    }
+    
+    challengesList.innerHTML = '';
+    
+    Object.entries(challenges)
+        .filter(([id, challenge]) => {
+            const matchesSearch = challenge.title.toLowerCase().includes(searchTerm) ||
+                                 challenge.description.toLowerCase().includes(searchTerm);
+            const matchesCategory = !filterCategory || challenge.category === filterCategory;
+            return matchesSearch && matchesCategory;
+        })
+        .sort(([,a], [,b]) => new Date(b.createdAt) - new Date(a.createdAt))
+        .forEach(([challengeId, challenge]) => {
+            const challengeCard = document.createElement('div');
+            challengeCard.className = 'admin-challenge-card';
+            challengeCard.innerHTML = `
+                <div class="admin-challenge-header">
+                    <div>
+                        <h4 class="admin-challenge-title">${challenge.title}</h4>
+                        <div class="admin-challenge-meta">
+                            <span class="challenge-difficulty difficulty-${challenge.difficulty}">
+                                ${challenge.difficulty.charAt(0).toUpperCase() + challenge.difficulty.slice(1)}
+                            </span>
+                            <span class="challenge-category category-${challenge.category}">
+                                ${challenge.category.charAt(0).toUpperCase() + challenge.category.slice(1)}
+                            </span>
+                            <span class="challenge-date">
+                                ${new Date(challenge.createdAt).toLocaleDateString()}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="admin-challenge-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editChallenge('${challengeId}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteChallenge('${challengeId}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+                <p class="admin-challenge-description">${challenge.description}</p>
+                <div class="admin-challenge-details">
+                    <div><strong>Flag:</strong> <code>${challenge.flag}</code></div>
+                    ${challenge.hint ? `<div><strong>Hint:</strong> ${challenge.hint}</div>` : ''}
+                    ${challenge.fileLink ? `<div><strong>File:</strong> <a href="${challenge.fileLink}" target="_blank">Download</a></div>` : ''}
+                    <div><strong>Creator:</strong> ${challenge.creator}</div>
+                </div>
+            `;
+            challengesList.appendChild(challengeCard);
+        });
+}
+
+function filterChallenges() {
+    loadAdminChallenges();
+}
+
+function updateAdminStats() {
+    const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+    const stats = {
+        total: 0,
+        crypto: 0,
+        reverse: 0,
+        web: 0,
+        forensics: 0,
+        misc: 0
+    };
+    
+    Object.values(challenges).forEach(challenge => {
+        stats.total++;
+        stats[challenge.category]++;
+    });
+    
+    document.getElementById('total-challenges').textContent = stats.total;
+    document.getElementById('crypto-challenges-count').textContent = stats.crypto;
+    document.getElementById('reverse-challenges-count').textContent = stats.reverse;
+    document.getElementById('web-challenges-count').textContent = stats.web;
+    document.getElementById('forensics-challenges-count').textContent = stats.forensics;
+    document.getElementById('misc-challenges-count').textContent = stats.misc;
+}
+
+// Enhanced authentication to check for admin
 function handleLogin(event) {
     event.preventDefault();
     
@@ -178,22 +268,33 @@ function handleLogin(event) {
     loginBtn.innerHTML = '<span class="loading"></span> Logging in...';
     loginBtn.disabled = true;
     
-    auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            // Signed in
+    // Check for admin credentials
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        setTimeout(() => {
+            localStorage.setItem('userLoggedIn', 'true');
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('isAdmin', 'true');
+            
+            loginBtn.innerHTML = 'Login';
+            loginBtn.disabled = false;
+            showNotification('Admin login successful!', 'success');
+            window.location.href = 'dashboard.html';
+        }, 1000);
+    } else {
+        // Regular user login (you can implement proper user authentication here)
+        setTimeout(() => {
+            localStorage.setItem('userLoggedIn', 'true');
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('isAdmin', 'false');
+            
             loginBtn.innerHTML = 'Login';
             loginBtn.disabled = false;
             showNotification('Login successful!', 'success');
-            window.location.href = 'index.html';
-        })
-        .catch((error) => {
-            loginBtn.innerHTML = 'Login';
-            loginBtn.disabled = false;
-            showNotification(error.message, 'error');
-        });
+            window.location.href = 'dashboard.html';
+        }, 1000);
+    }
 }
 
-// Handle registration with Firebase Auth
 function handleRegister(event) {
     event.preventDefault();
     
@@ -215,230 +316,92 @@ function handleRegister(event) {
         return;
     }
     
+    // Prevent registering with admin email
+    if (email === ADMIN_EMAIL) {
+        showNotification('This email is reserved for admin use', 'error');
+        return;
+    }
+    
     // Show loading state
     registerBtn.innerHTML = '<span class="loading"></span> Creating account...';
     registerBtn.disabled = true;
     
-    auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            
-            // Create user profile in Firebase Database
-            const userData = {
-                name: name,
-                email: email,
-                createdAt: new Date().toISOString()
-            };
-            
-            database.ref('users/' + user.uid).set(userData)
-                .then(() => {
-                    registerBtn.innerHTML = 'Register';
-                    registerBtn.disabled = false;
-                    showNotification('Registration successful! You are now logged in.', 'success');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    registerBtn.innerHTML = 'Register';
-                    registerBtn.disabled = false;
-                    showNotification('Error saving user data: ' + error.message, 'error');
-                });
-        })
-        .catch((error) => {
-            registerBtn.innerHTML = 'Register';
-            registerBtn.disabled = false;
-            showNotification(error.message, 'error');
-        });
+    // Simulate registration process
+    setTimeout(() => {
+        // Store user data in localStorage
+        const users = JSON.parse(localStorage.getItem('users')) || {};
+        users[email] = {
+            name: name,
+            email: email,
+            createdAt: new Date().toISOString()
+        };
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // Log the user in
+        localStorage.setItem('userLoggedIn', 'true');
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('isAdmin', 'false');
+        
+        registerBtn.innerHTML = 'Register';
+        registerBtn.disabled = false;
+        showNotification('Registration successful! You are now logged in.', 'success');
+        window.location.href = 'dashboard.html';
+    }, 1500);
 }
 
-// Add new challenge to Firebase (admin function)
-function addChallenge(event) {
-    event.preventDefault();
+// Enhanced auth UI to show admin link
+function updateAuthUI() {
+    const isLoggedIn = checkAuth();
+    const isAdminUser = localStorage.getItem('isAdmin') === 'true';
+    const authElements = document.querySelectorAll('.auth-only');
+    const guestElements = document.querySelectorAll('.guest-only');
+    const adminElements = document.querySelectorAll('.admin-only');
     
-    if (!currentUser || !currentUser.isAdmin) {
-        showNotification('You must be an admin to add challenges', 'error');
-        return;
-    }
-    
-    const title = document.getElementById('challenge-title').value;
-    const category = document.getElementById('challenge-category').value;
-    const creator = document.getElementById('challenge-creator').value;
-    const difficulty = document.getElementById('challenge-difficulty').value;
-    const description = document.getElementById('challenge-description').value;
-    const hint = document.getElementById('challenge-hint').value;
-    const flag = document.getElementById('challenge-flag').value;
-    const fileLink = document.getElementById('challenge-file-link').value;
-    const addChallengeBtn = document.getElementById('add-challenge-btn');
-    
-    // Generate a unique ID for the challenge
-    const challengeId = 'challenge-' + Math.random().toString(36).substr(2, 9);
-    
-    // Show loading state
-    addChallengeBtn.innerHTML = '<span class="loading"></span> Adding...';
-    addChallengeBtn.disabled = true;
-    
-    // Add new challenge to Firebase
-    const challengeData = {
-        title: title,
-        category: category,
-        difficulty: difficulty,
-        description: description,
-        hint: hint,
-        flag: flag,
-        fileLink: fileLink,
-        creator: creator,
-        createdAt: new Date().toISOString(),
-        createdBy: currentUser.uid
-    };
-    
-    database.ref('challenges/' + challengeId).set(challengeData)
-        .then(() => {
-            addChallengeBtn.innerHTML = 'Add Challenge';
-            addChallengeBtn.disabled = false;
-            showNotification('Challenge added successfully!', 'success');
-            event.target.reset();
-            loadChallenges(); // Reload challenges to show the new one
-            populateRemoveChallengeDropdown(); // Update the remove dropdown
-        })
-        .catch((error) => {
-            addChallengeBtn.innerHTML = 'Add Challenge';
-            addChallengeBtn.disabled = false;
-            showNotification('Error adding challenge: ' + error.message, 'error');
+    if (isLoggedIn) {
+        authElements.forEach(el => el.style.display = 'block');
+        guestElements.forEach(el => el.style.display = 'none');
+        
+        // Show admin elements only for admin users
+        adminElements.forEach(el => {
+            el.style.display = isAdminUser ? 'block' : 'none';
         });
-}
-
-// Remove challenge from Firebase (admin function)
-function removeChallenge() {
-    if (!currentUser || !currentUser.isAdmin) {
-        showNotification('You must be an admin to remove challenges', 'error');
-        return;
-    }
-    
-    const challengeId = document.getElementById('remove-challenge').value;
-    
-    if (!challengeId) {
-        showNotification('Please select a challenge to remove', 'error');
-        return;
-    }
-    
-    if (confirm('Are you sure you want to remove this challenge? This action cannot be undone.')) {
-        database.ref('challenges/' + challengeId).remove()
-            .then(() => {
-                showNotification('Challenge removed successfully!', 'success');
-                loadChallenges(); // Reload challenges
-                populateRemoveChallengeDropdown(); // Update the remove dropdown
-            })
-            .catch((error) => {
-                showNotification('Error removing challenge: ' + error.message, 'error');
-            });
+    } else {
+        authElements.forEach(el => el.style.display = 'none');
+        guestElements.forEach(el => el.style.display = 'block');
+        adminElements.forEach(el => el.style.display = 'none');
     }
 }
 
-// Populate the remove challenge dropdown
-function populateRemoveChallengeDropdown() {
-    if (!currentUser || !currentUser.isAdmin) return;
+// Enhanced initApp function
+function initApp() {
+    // Load challenges when the page loads
+    if (document.querySelector('.challenge-grid')) {
+        const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+        if (Object.keys(challenges).length === 0) {
+            initializeDefaultChallenges();
+        } else {
+            loadChallenges();
+        }
+    }
     
-    const removeSelect = document.getElementById('remove-challenge');
-    removeSelect.innerHTML = '<option value="">-- Select Challenge --</option>';
+    // Load dashboard when on dashboard page
+    if (document.getElementById('recent-challenges')) {
+        loadDashboard();
+    }
     
-    database.ref('challenges').once('value')
-        .then(snapshot => {
-            const challenges = snapshot.val() || {};
-            
-            for (const [challengeId, challenge] of Object.entries(challenges)) {
-                const option = document.createElement('option');
-                option.value = challengeId;
-                option.textContent = challenge.title;
-                removeSelect.appendChild(option);
-            }
-        })
-        .catch(error => {
-            console.error('Error loading challenges for removal:', error);
-        });
-}
-
-// Load challenges from Firebase
-function loadChallenges() {
-    database.ref('challenges').once('value')
-        .then(snapshot => {
-            const challenges = snapshot.val() || {};
-            
-            // If no challenges in Firebase, use the hardcoded ones as fallback
-            if (Object.keys(challenges).length === 0) {
-                initializeDefaultChallenges();
-                return;
-            }
-            
-            // Clear existing challenge grids
-            document.querySelectorAll('.challenge-grid').forEach(grid => {
-                grid.innerHTML = '';
-            });
-            
-            // Add each challenge to the appropriate category
-            for (const [challengeId, challenge] of Object.entries(challenges)) {
-                const challengeCard = document.createElement('div');
-                challengeCard.className = `challenge-card ${challenge.category}-challenge`;
-                challengeCard.id = challengeId;
-                
-                challengeCard.innerHTML = `
-<div class="challenge-header">
-    <div>
-        <h3 class="challenge-title">${challenge.title}</h3>
-        <span class="challenge-difficulty difficulty-${challenge.difficulty}">
-            ${challenge.difficulty.charAt(0).toUpperCase() + challenge.difficulty.slice(1)}
-        </span>
-    </div>
-    <span class="challenge-status status-unsolved">Unsolved</span>
-</div>
-    <p class="challenge-description">${challenge.description}</p>
-${challenge.hint ? `
-    <div class="hint-revealer" onclick="toggleHint(this)">
-        <div class="hint-title">
-            <i class="fas fa-lightbulb"></i>
-            <span>Show Hint</span>
-        </div>
-        <div class="hint-content">${challenge.hint}</div>
-    </div>` : ''}
-${challenge.fileLink ? `
-    <a href="${challenge.fileLink}" class="download-link" target="_blank">
-        <i class="fas fa-download"></i> Download File
-    </a>` : ''}
-${challenge.creator ? `<p><strong>Creator:</strong> ${challenge.creator}</p>` : ''}
-<form class="flag-form" onsubmit="validateFlag(event, '${challenge.flag}', '${challenge.category}', '${challengeId}')">
-    <input type="text" class="flag-input" placeholder="Enter flag: dedSEC{...}" required>
-    <button type="submit" class="submit-btn">Submit Flag</button>
-</form>
-`;
-
-                
-                // Add to the appropriate category grid
-                document.getElementById(`${challenge.category}-challenges`).appendChild(challengeCard);
-            }
-            
-            // Load solved challenges to update UI
-            if (currentUser) {
-                loadSolvedChallenges();
-            }
-        })
-        .catch(error => {
-            console.error('Error loading challenges:', error);
-            showNotification('Error loading challenges', 'error');
-        });
-}
-
-// Initialize with default challenges if Firebase is empty
-function initializeDefaultChallenges() {
-    const defaultChallenges = {
-        // Your default challenges here
-    };
+    // Load admin interface when on admin page
+    if (document.getElementById('admin-challenges-list')) {
+        if (!isAdmin()) {
+            showNotification('Access denied. Admin privileges required.', 'error');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+            return;
+        }
+        loadAdminChallenges();
+        updateAdminStats();
+    }
     
-    // Save default challenges to Firebase
-    database.ref('challenges').set(defaultChallenges)
-        .then(() => {
-            loadChallenges(); // Recursively call to load the default challenges
-        })
-        .catch(error => {
-            console.error('Error saving default challenges:', error);
-            showNotification('Error initializing challenges', 'error');
-        });
+    // Check authentication status and update UI
+    updateAuthUI();
 }
