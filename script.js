@@ -1,91 +1,3 @@
-// Firebase configuration - Replace with your project's config
-const firebaseConfig = {
-    apiKey: "AIzaSyCY3gyOmv39fJC3_dkwpBHK9FJX8yKjL1o",
-    authDomain: "dedsec-59379.firebaseapp.com",
-    databaseURL: "https://dedsec-59379-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "dedsec-59379",
-    storageBucket: "dedsec-59379.firebasestorage.app",
-    messagingSenderId: "206084131371",
-    appId: "1:206084131371:web:3212838d970d529567386e",
-    measurementId: "G-FF3QWXSQS9"
-    };
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
-
-// Global variables
-let currentUser = null;
-const ADMIN_EMAIL = "dedsecctt@gmail.com";
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up authentication state observer
-    auth.onAuthStateChanged(function(user) {
-        if (user) {
-            // User is signed in
-            currentUser = {
-                uid: user.uid,
-                email: user.email,
-                isAdmin: user.email === ADMIN_EMAIL
-            };
-            
-            updateUIForUser();
-            loadChallenges();
-            loadSolvedChallenges();
-        } else {
-            // User is signed out
-            currentUser = null;
-            updateUIForUser();
-            showSection('home');
-        }
-    });
-    
-    // Set up category navigation
-    document.querySelectorAll('.category-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const category = this.getAttribute('data-category');
-            showCategory(category);
-            
-            // Update active state
-            document.querySelectorAll('.category-link').forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-    
-    // Show home section by default
-    showSection('home');
-});
-
-// Show a specific section
-function showSection(sectionId) {
-    // Hide all sections
-    document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Show the requested section
-    document.getElementById(`${sectionId}-section`).classList.add('active');
-    
-    // If showing challenges, update the stats
-    if (sectionId === 'challenges') {
-        updateStats();
-    }
-}
-
-// Show challenges for a specific category
-function showCategory(category) {
-    // Hide all challenge sections
-    document.querySelectorAll('#crypto-section, #reverse-section, #web-section, #forensics-section, #misc-section').forEach(section => {
-        section.classList.remove('active');
-    });
-    
-    // Show the requested category
-    document.getElementById(`${category}-section`).classList.add('active');
-}
-
 // Toggle hint visibility
 function toggleHint(element) {
     const hintContent = element.querySelector('.hint-content');
@@ -254,17 +166,6 @@ function resetProgress() {
     }
 }
 
-// Show notification
-function showNotification(message, type) {
-    const notification = document.getElementById('notification');
-    notification.textContent = message;
-    notification.className = `notification ${type}`;
-    
-    setTimeout(() => {
-        notification.className = 'notification';
-    }, 3000);
-}
-
 // Handle login with Firebase Auth
 function handleLogin(event) {
     event.preventDefault();
@@ -283,7 +184,7 @@ function handleLogin(event) {
             loginBtn.innerHTML = 'Login';
             loginBtn.disabled = false;
             showNotification('Login successful!', 'success');
-            showSection('home');
+            window.location.href = 'index.html';
         })
         .catch((error) => {
             loginBtn.innerHTML = 'Login';
@@ -335,7 +236,7 @@ function handleRegister(event) {
                     registerBtn.innerHTML = 'Register';
                     registerBtn.disabled = false;
                     showNotification('Registration successful! You are now logged in.', 'success');
-                    showSection('home');
+                    window.location.href = 'index.html';
                 })
                 .catch((error) => {
                     registerBtn.innerHTML = 'Register';
@@ -348,44 +249,6 @@ function handleRegister(event) {
             registerBtn.disabled = false;
             showNotification(error.message, 'error');
         });
-}
-
-// Logout
-function logout() {
-    auth.signOut()
-        .then(() => {
-            showNotification('Logged out successfully', 'success');
-            showSection('home');
-        })
-        .catch((error) => {
-            showNotification('Error signing out: ' + error.message, 'error');
-        });
-}
-
-// Update UI based on user login state
-function updateUIForUser() {
-    const loginNav = document.getElementById('login-nav');
-    const registerNav = document.getElementById('register-nav');
-    const logoutNav = document.getElementById('logout-nav');
-    const adminNav = document.getElementById('admin-nav');
-    
-    if (currentUser) {
-        loginNav.style.display = 'none';
-        registerNav.style.display = 'none';
-        logoutNav.style.display = 'block';
-        
-        if (currentUser.isAdmin) {
-            adminNav.style.display = 'block';
-            populateRemoveChallengeDropdown();
-        } else {
-            adminNav.style.display = 'none';
-        }
-    } else {
-        loginNav.style.display = 'block';
-        registerNav.style.display = 'block';
-        logoutNav.style.display = 'none';
-        adminNav.style.display = 'none';
-    }
 }
 
 // Add new challenge to Firebase (admin function)
@@ -423,11 +286,10 @@ function addChallenge(event) {
         hint: hint,
         flag: flag,
         fileLink: fileLink,
-        creator: creator,   // <--- add this
+        creator: creator,
         createdAt: new Date().toISOString(),
         createdBy: currentUser.uid
     };
-
     
     database.ref('challenges/' + challengeId).set(challengeData)
         .then(() => {
@@ -567,7 +429,7 @@ ${challenge.creator ? `<p><strong>Creator:</strong> ${challenge.creator}</p>` : 
 // Initialize with default challenges if Firebase is empty
 function initializeDefaultChallenges() {
     const defaultChallenges = {
-        
+        // Your default challenges here
     };
     
     // Save default challenges to Firebase

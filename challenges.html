@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenges - DEDSEC CTF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-user-secret"></i>
+                DEDSEC CTF
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="challenges.html" class="nav-link">Challenges</a>
+                <a href="help.html" class="nav-link">Help</a>
+                <a href="login.html" class="nav-link" id="login-nav">Login</a>
+                <a href="register.html" class="nav-link" id="register-nav">Register</a>
+                <a href="#" class="nav-link" id="logout-nav" style="display: none;" onclick="logout()">Logout</a>
+                <a href="admin.html" class="nav-link" id="admin-nav" style="display: none;">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="dashboard">
+            <aside class="sidebar">
+                <h2 class="sidebar-title">Categories</h2>
+                <ul class="category-list">
+                    <li class="category-item">
+                        <a href="#crypto" class="category-link crypto active" data-category="crypto">
+                            <i class="fas fa-lock"></i>
+                            Cryptography
+                        </a>
+                    </li>
+                    <li class="category-item">
+                        <a href="#reverse" class="category-link reverse" data-category="reverse">
+                            <i class="fas fa-microchip"></i>
+                            Reverse Engineering
+                        </a>
+                    </li>
+                    <li class="category-item">
+                        <a href="#web" class="category-link web" data-category="web">
+                            <i class="fas fa-code"></i>
+                            Web Exploitation
+                        </a>
+                    </li>
+                    <li class="category-item">
+                        <a href="#forensics" class="category-link forensics" data-category="forensics">
+                            <i class="fas fa-search"></i>
+                            Forensics
+                        </a>
+                    </li>
+                    <li class="category-item">
+                        <a href="#misc" class="category-link misc" data-category="misc">
+                            <i class="fas fa-star"></i>
+                            Binary Exploitation
+                        </a>
+                    </li>
+                </ul>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                    <button class="reset-btn" onclick="resetProgress()">
+                        <i class="fas fa-trash-alt"></i> Reset Progress
+                    </button>
+                </div>
+            </aside>
+
+            <div class="content">
+                <section class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">Your Progress</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="total-solved">0</div>
+                            <div class="stat-label">Challenges Solved</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="crypto-solved">0</div>
+                            <div class="stat-label">Cryptography</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="reverse-solved">0</div>
+                            <div class="stat-label">Reverse Engineering</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="web-solved">0</div>
+                            <div class="stat-label">Web Exploitation</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="forensics-solved">0</div>
+                            <div class="stat-label">Forensics</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="misc-solved">0</div>
+                            <div class="stat-label">Binary Exploitation</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section active" id="crypto-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-lock"></i> Cryptography Challenges</h2>
+                    </div>
+                    <div class="challenge-grid" id="crypto-challenges">
+                        <!-- Challenges will be loaded dynamically -->
+                    </div>
+                </section>
+
+                <section class="section" id="reverse-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-microchip"></i> Reverse Engineering Challenges</h2>
+                    </div>
+                    <div class="challenge-grid" id="reverse-challenges">
+                        <!-- Challenges will be loaded dynamically -->
+                    </div>
+                </section>
+
+                <section class="section" id="web-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-code"></i> Web Exploitation Challenges</h2>
+                    </div>
+                    <div class="challenge-grid" id="web-challenges">
+                        <!-- Challenges will be loaded dynamically -->
+                    </div>
+                </section>
+
+                <section class="section" id="forensics-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-search"></i> Forensics Challenges</h2>
+                    </div>
+                    <div class="challenge-grid" id="forensics-challenges">
+                        <!-- Challenges will be loaded dynamically -->
+                    </div>
+                </section>
+
+                <section class="section" id="misc-section">
+                    <div class="section-header">
+                        <h2 class="section-title"><i class="fas fa-star"></i> Binary Exploitation Challenges</h2>
+                    </div>
+                    <div class="challenge-grid" id="misc-challenges">
+                        <!-- Challenges will be loaded dynamically -->
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <footer class="footer">
+        <p>DEDSEC CTF Challenge Platform &copy; 2023. All rights reserved.</p>
+        <p>This platform is for educational purposes only.</p>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
