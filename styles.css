@@ -1,19 +1,19 @@
 /* Your existing CSS remains unchanged */
 :root {
-    --primary: #0d1117;
-    --secondary: #161b22;
-    --accent: #58a6ff;
-    --accent-dark: #388bfd;
+    --primary: #0e180c;
+    --secondary: #162218;
+    --accent: #3ebb53;
+    --accent-dark: #38fd48;
     --text: #c9d1d9;
     --danger: #f85149;
-    --success: #3fb950;
-    --crypto: #a371f7;
-    --reverse: #ff7b72;
-    --web: #79c0ff;
-    --forensics: #7ee787;
-    --misc: #ffa657;
-    --card-bg: #21262d;
-    --header-bg: #0d1117;
+    --success: #71f783;
+    --crypto: #71f783;
+    --reverse: #71f783;
+    --web: #71f783;
+    --forensics: #71f783;
+    --misc: #71f783;
+    --card-bg: #212d22;
+    --header-bg: #0d170f;
     --border: #30363d;
 }
 
