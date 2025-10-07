@@ -850,6 +850,125 @@ body {
     animation: spin 1s ease-in-out infinite;
 }
 
+/* Additional styles for CTFd-like challenge appearance */
+.solved-challenge {
+    border-color: var(--success) !important;
+    background: linear-gradient(135deg, rgba(113, 247, 131, 0.05), rgba(113, 247, 131, 0.02));
+}
+
+.solved-challenge .challenge-title {
+    color: var(--success);
+}
+
+.solved-challenge .challenge-status {
+    background-color: rgba(113, 247, 131, 0.2);
+    color: var(--success);
+}
+
+/* CTFd-like color scheme for solved challenges */
+.challenge-card.solved-challenge {
+    position: relative;
+    overflow: hidden;
+}
+
+.challenge-card.solved-challenge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--success), var(--accent));
+}
+
+/* Navigation active states */
+.nav-link.active {
+    color: var(--accent);
+    position: relative;
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--accent);
+}
+
+/* Enhanced challenge grid */
+.challenge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.challenge-card {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Loading animation enhancement */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Form enhancements */
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(62, 187, 83, 0.15);
+}
+
+/* Button enhancements */
+.btn {
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Notification enhancements */
+.notification {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Make sure all pages have consistent navigation */
+.guest-only, .auth-only, .admin-only {
+    transition: all 0.3s ease;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .challenge-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .nav {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+}
+
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
@@ -929,3 +1048,4 @@ body {
         margin: 30px auto;
     }
 }
+

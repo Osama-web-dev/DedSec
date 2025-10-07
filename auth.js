@@ -1,95 +1,4 @@
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyCY3gyOmv39fJC3_dkwpBHK9FJX8yKjL1o",
-    authDomain: "dedsec-59379.firebaseapp.com",
-    databaseURL: "https://dedsec-59379-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "dedsec-59379",
-    storageBucket: "dedsec-59379.firebasestorage.app",
-    messagingSenderId: "206084131371",
-    appId: "1:206084131371:web:3212838d970d529567386e",
-    measurementId: "G-FF3QWXSQS9"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
-
-// Global variables
-let currentUser = null;
-const ADMIN_EMAIL = "dedsecctt@gmail.com";
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up authentication state observer
-    auth.onAuthStateChanged(function(user) {
-        if (user) {
-            // User is signed in
-            currentUser = {
-                uid: user.uid,
-                email: user.email,
-                isAdmin: user.email === ADMIN_EMAIL
-            };
-            
-            updateUIForUser();
-            
-            // Load specific page content based on current page
-            if (window.location.pathname.includes('challenges.html')) {
-                loadChallenges();
-                loadSolvedChallenges();
-                setupCategoryNavigation();
-            } else if (window.location.pathname.includes('admin.html')) {
-                populateRemoveChallengeDropdown();
-            }
-        } else {
-            // User is signed out
-            currentUser = null;
-            updateUIForUser();
-            
-            // Redirect to home if on admin page without permission
-            if (window.location.pathname.includes('admin.html')) {
-                window.location.href = 'index.html';
-            }
-        }
-    });
-});
-
-// Update UI based on user login state
-function updateUIForUser() {
-    const loginNav = document.getElementById('login-nav');
-    const registerNav = document.getElementById('register-nav');
-    const logoutNav = document.getElementById('logout-nav');
-    const adminNav = document.getElementById('admin-nav');
-    
-    if (currentUser) {
-        if (loginNav) loginNav.style.display = 'none';
-        if (registerNav) registerNav.style.display = 'none';
-        if (logoutNav) logoutNav.style.display = 'block';
-        
-        if (currentUser.isAdmin && adminNav) {
-            adminNav.style.display = 'block';
-        } else if (adminNav) {
-            adminNav.style.display = 'none';
-        }
-    } else {
-        if (loginNav) loginNav.style.display = 'block';
-        if (registerNav) registerNav.style.display = 'block';
-        if (logoutNav) logoutNav.style.display = 'none';
-        if (adminNav) adminNav.style.display = 'none';
-    }
-}
-
-// Logout
-function logout() {
-    auth.signOut()
-        .then(() => {
-            showNotification('Logged out successfully', 'success');
-            window.location.href = 'index.html';
-        })
-        .catch((error) => {
-            showNotification('Error signing out: ' + error.message, 'error');
-        });
-}
+// Authentication functions using localStorage
 
 // Show notification
 function showNotification(message, type) {
@@ -102,6 +11,59 @@ function showNotification(message, type) {
             notification.className = 'notification';
         }, 3000);
     }
+}
+
+// Check if user is logged in
+function checkAuth() {
+    return localStorage.getItem('userLoggedIn') === 'true';
+}
+
+// Check if user is admin
+function isAdmin() {
+    const userEmail = localStorage.getItem('userEmail');
+    return userEmail === "admin@dedsec.com";
+}
+
+// Update UI based on authentication status
+function updateAuthUI() {
+    const isLoggedIn = checkAuth();
+    const isAdminUser = isAdmin();
+    const authElements = document.querySelectorAll('.auth-only');
+    const guestElements = document.querySelectorAll('.guest-only');
+    const adminElements = document.querySelectorAll('.admin-only');
+    
+    if (isLoggedIn) {
+        authElements.forEach(el => el.style.display = 'block');
+        guestElements.forEach(el => el.style.display = 'none');
+        
+        // Show admin elements only for admin users
+        adminElements.forEach(el => {
+            el.style.display = isAdminUser ? 'block' : 'none';
+        });
+        
+        // Update user info
+        const userName = localStorage.getItem('userName') || localStorage.getItem('userEmail');
+        const userWelcomeElements = document.querySelectorAll('.user-welcome');
+        userWelcomeElements.forEach(el => {
+            el.textContent = userName;
+        });
+    } else {
+        authElements.forEach(el => el.style.display = 'none');
+        guestElements.forEach(el => el.style.display = 'block');
+        adminElements.forEach(el => el.style.display = 'none');
+    }
+}
+
+// Logout function
+function logout() {
+    localStorage.removeItem('userLoggedIn');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('isAdmin');
+    showNotification('Logged out successfully', 'success');
+    setTimeout(() => {
+        window.location.href = 'index.html';
+    }, 1000);
 }
 
 // Setup category navigation for challenges page
@@ -129,3 +91,13 @@ function showCategory(category) {
     // Show the requested category
     document.getElementById(`${category}-section`).classList.add('active');
 }
+
+// Initialize auth when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    updateAuthUI();
+    
+    // Load specific page content based on current page
+    if (window.location.pathname.includes('challenges.html')) {
+        setupCategoryNavigation();
+    }
+});

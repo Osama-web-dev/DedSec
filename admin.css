@@ -1,0 +1,173 @@
+/* Admin Panel Styles */
+.admin-form-section {
+    background-color: var(--secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.search-controls {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.admin-challenge-card {
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.admin-challenge-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.admin-challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.admin-challenge-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+}
+
+.admin-challenge-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.challenge-category {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.category-crypto {
+    background-color: rgba(163, 113, 247, 0.15);
+    color: var(--crypto);
+}
+
+.category-reverse {
+    background-color: rgba(255, 123, 114, 0.15);
+    color: var(--reverse);
+}
+
+.category-web {
+    background-color: rgba(121, 192, 255, 0.15);
+    color: var(--web);
+}
+
+.category-forensics {
+    background-color: rgba(126, 231, 135, 0.15);
+    color: var(--forensics);
+}
+
+.category-misc {
+    background-color: rgba(255, 166, 87, 0.15);
+    color: var(--misc);
+}
+
+.challenge-date {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.admin-challenge-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.admin-challenge-description {
+    margin-bottom: 12px;
+    font-size: 14px;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.admin-challenge-details {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 13px;
+}
+
+.admin-challenge-details div {
+    margin-bottom: 6px;
+}
+
+.admin-challenge-details code {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.admin-challenge-details a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.admin-challenge-details a:hover {
+    text-decoration: underline;
+}
+
+/* Admin-only navigation */
+.admin-only {
+    background: linear-gradient(45deg, var(--accent), var(--success));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+}
+
+/* Responsive admin styles */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-controls {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-challenge-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .admin-challenge-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .admin-challenge-meta {
+        flex-direction: column;
+        gap: 6px;
+    }
+}

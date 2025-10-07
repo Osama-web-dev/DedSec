@@ -1,0 +1,156 @@
+/* Dashboard Specific Styles */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.dashboard-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.user-welcome {
+    font-size: 18px;
+    color: var(--text);
+    opacity: 0.8;
+}
+
+.dashboard-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.stats-section {
+    background-color: var(--secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 24px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.recent-activity, .quick-actions {
+    background-color: var(--secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 24px;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.action-card {
+    display: block;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 20px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    color: var(--text);
+}
+
+.action-card.crypto:hover {
+    border-color: var(--crypto);
+}
+
+.action-card.reverse:hover {
+    border-color: var(--reverse);
+}
+
+.action-card.web:hover {
+    border-color: var(--web);
+}
+
+.action-card.forensics:hover {
+    border-color: var(--forensics);
+}
+
+.action-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+}
+
+.action-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.action-card p {
+    font-size: 14px;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* Stats card colors for dashboard */
+.stat-card.total {
+    border-left: 4px solid var(--accent);
+}
+
+.stat-card.crypto {
+    border-left: 4px solid var(--crypto);
+}
+
+.stat-card.reverse {
+    border-left: 4px solid var(--reverse);
+}
+
+.stat-card.web {
+    border-left: 4px solid var(--web);
+}
+
+.stat-card.forensics {
+    border-left: 4px solid var(--forensics);
+}
+
+.stat-card.misc {
+    border-left: 4px solid var(--misc);
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .dashboard-title {
+        font-size: 24px;
+    }
+}

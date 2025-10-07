@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - DEDSEC CTF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-user-secret"></i>
+                DEDSEC CTF
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="challenges.html" class="nav-link">Challenges</a>
+                <a href="profile.html" class="nav-link active">Profile</a>
+                <a href="help.html" class="nav-link">Help</a>
+                <a href="login.html" class="nav-link guest-only">Login</a>
+                <a href="register.html" class="nav-link guest-only">Register</a>
+                <a href="#" class="nav-link auth-only" style="display: none;" onclick="logout()">Logout</a>
+                <a href="admin.html" class="nav-link admin-only" style="display: none;">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="profile-header">
+            <div class="profile-info">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-secret"></i>
+                </div>
+                <div class="profile-details">
+                    <h1 class="profile-name" id="profile-name">User Name</h1>
+                    <p class="profile-email" id="profile-email">user@example.com</p>
+                    <p class="profile-join-date">Joined: <span id="join-date">Recently</span></p>
+                </div>
+            </div>
+            <div class="profile-actions">
+                <button class="btn btn-danger" onclick="resetProgress()">
+                    <i class="fas fa-trash-alt"></i> Reset Progress
+                </button>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <section class="stats-section">
+                <h2 class="section-title">Statistics</h2>
+                <div class="stats-grid" id="profile-stats">
+                    <div class="stat-card total">
+                        <div class="stat-value" id="profile-total">0</div>
+                        <div class="stat-label">Total Solved</div>
+                    </div>
+                    <div class="stat-card crypto">
+                        <div class="stat-value" id="profile-crypto">0</div>
+                        <div class="stat-label">Cryptography</div>
+                    </div>
+                    <div class="stat-card reverse">
+                        <div class="stat-value" id="profile-reverse">0</div>
+                        <div class="stat-label">Reverse Engineering</div>
+                    </div>
+                    <div class="stat-card web">
+                        <div class="stat-value" id="profile-web">0</div>
+                        <div class="stat-label">Web Exploitation</div>
+                    </div>
+                    <div class="stat-card forensics">
+                        <div class="stat-value" id="profile-forensics">0</div>
+                        <div class="stat-label">Forensics</div>
+                    </div>
+                    <div class="stat-card misc">
+                        <div class="stat-value" id="profile-misc">0</div>
+                        <div class="stat-label">Binary Exploitation</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="solved-challenges">
+                <h2 class="section-title">Solved Challenges</h2>
+                <div class="challenge-grid" id="profile-challenges">
+                    <!-- Solved challenges will be loaded dynamically -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <footer class="footer">
+        <p>DEDSEC CTF Challenge Platform &copy; 2023. All rights reserved.</p>
+        <p>This platform is for educational purposes only.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

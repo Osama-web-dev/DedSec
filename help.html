@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - DEDSEC CTF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="help.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-user-secret"></i>
+                DEDSEC CTF
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="challenges.html" class="nav-link">Challenges</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <a href="help.html" class="nav-link active">Help</a>
+                <a href="login.html" class="nav-link guest-only">Login</a>
+                <a href="register.html" class="nav-link guest-only">Register</a>
+                <a href="#" class="nav-link auth-only" style="display: none;" onclick="logout()">Logout</a>
+                <a href="admin.html" class="nav-link admin-only" style="display: none;">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="help-container">
+            <h1 class="help-title">CTF Help & Guidelines</h1>
+            
+            <div class="help-section">
+                <h2 class="help-section-title">
+                    <i class="fas fa-flag"></i>
+                    How to Play
+                </h2>
+                <div class="help-content">
+                    <p>Capture The Flag (CTF) competitions are cybersecurity challenges where you find hidden "flags" in various challenges.</p>
+                    <ol>
+                        <li><strong>Browse Challenges:</strong> Go to the Challenges page and select a category</li>
+                        <li><strong>Read Description:</strong> Each challenge has a description explaining what you need to do</li>
+                        <li><strong>Download Files:</strong> Some challenges require downloading files to analyze</li>
+                        <li><strong>Find the Flag:</strong> Solve the challenge to find a flag in the format: <code>dedSEC{example_flag}</code></li>
+                        <li><strong>Submit Flag:</strong> Enter the flag in the submission box to earn points</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="help-section">
+                <h2 class="help-section-title">
+                    <i class="fas fa-lock"></i>
+                    Challenge Categories
+                </h2>
+                <div class="help-content">
+                    <div class="category-grid">
+                        <div class="category-card crypto">
+                            <div class="category-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h3>Cryptography</h3>
+                            <p>Decrypt messages, break ciphers, and solve encryption-based puzzles. Tools like CyberChef, Python cryptography libraries, and frequency analysis are useful.</p>
+                        </div>
+                        <div class="category-card reverse">
+                            <div class="category-icon">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <h3>Reverse Engineering</h3>
+                            <p>Analyze compiled programs to understand their functionality. Use tools like Ghidra, IDA Pro, Radare2, and debuggers.</p>
+                        </div>
+                        <div class="category-card web">
+                            <div class="category-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3>Web Exploitation</h3>
+                            <p>Find and exploit vulnerabilities in web applications. Common techniques include SQL injection, XSS, CSRF, and directory traversal.</p>
+                        </div>
+                        <div class="category-card forensics">
+                            <div class="category-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>Forensics</h3>
+                            <p>Analyze digital artifacts, network traffic, images, and file metadata. Tools include Wireshark, Binwalk, Steghide, and various hex editors.</p>
+                        </div>
+                        <div class="category-card misc">
+                            <div class="category-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3>Binary Exploitation</h3>
+                            <p>Exploit vulnerabilities in binary programs. Skills include buffer overflows, format string vulnerabilities, and ROP chains.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-section">
+                <h2 class="help-section-title">
+                    <i class="fas fa-tools"></i>
+                    Useful Tools
+                </h2>
+                <div class="help-content">
+                    <div class="tools-grid">
+                        <div class="tool-card">
+                            <h4>CyberChef</h4>
+                            <p>Web-based tool for encryption, encoding, and data analysis</p>
+                        </div>
+                        <div class="tool-card">
+                            <h4>Wireshark</h4>
+                            <p>Network protocol analyzer for forensics challenges</p>
+                        </div>
+                        <div class="tool-card">
+                            <h4>Ghidra</h4>
+                            <p>Reverse engineering suite developed by NSA</p>
+                        </div>
+                        <div class="tool-card">
+                            <h4>Burp Suite</h4>
+                            <p>Web application security testing tool</p>
+                        </div>
+                        <div class="tool-card">
+                            <h4>Binwalk</h4>
+                            <p>Firmware analysis tool for forensics</p>
+                        </div>
+                        <div class="tool-card">
+                            <h4>Python</h4>
+                            <p>Essential for scripting and solving various challenges</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="help-section">
+                <h2 class="help-section-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Tips & Strategies
+                </h2>
+                <div class="help-content">
+                    <ul>
+                        <li><strong>Start with easier challenges</strong> to understand the CTF format</li>
+                        <li><strong>Read challenge descriptions carefully</strong> - they often contain important hints</li>
+                        <li><strong>Use hints wisely</strong> - try to solve on your own first</li>
+                        <li><strong>Collaborate and discuss</strong> with other participants (if allowed)</li>
+                        <li><strong>Keep notes</strong> of techniques that work for different challenge types</li>
+                        <li><strong>Practice regularly</strong> to improve your skills</li>
+                        <li><strong>Don't get discouraged</strong> - some challenges are meant to be difficult</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="help-section">
+                <h2 class="help-section-title">
+                    <i class="fas fa-question-circle"></i>
+                    Frequently Asked Questions
+                </h2>
+                <div class="help-content">
+                    <div class="faq-item">
+                        <h4>What is the flag format?</h4>
+                        <p>All flags follow the format: <code>dedSEC{text_here}</code>. Make sure to include the "dedSEC{}" wrapper when submitting.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>Can I reset my progress?</h4>
+                        <p>Yes, you can reset your progress from the Dashboard or Profile page using the "Reset Progress" button.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>Do I need to create an account?</h4>
+                        <p>While you can browse challenges without an account, you need to register and login to submit flags and track your progress.</p>
+                    </div>
+                    <div class="faq-item">
+                        <h4>Are there any time limits?</h4>
+                        <p>No, this is a self-paced learning platform. Take your time to understand and solve each challenge.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <footer class="footer">
+        <p>DEDSEC CTF Challenge Platform &copy; 2023. All rights reserved.</p>
+        <p>This platform is for educational purposes only.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

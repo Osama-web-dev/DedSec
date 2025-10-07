@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DEDSEC CTF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-user-secret"></i>
+                DEDSEC CTF
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+                <a href="challenges.html" class="nav-link">Challenges</a>
+                <a href="profile.html" class="nav-link">Profile</a>
+                <a href="help.html" class="nav-link">Help</a>
+                <a href="login.html" class="nav-link guest-only">Login</a>
+                <a href="register.html" class="nav-link guest-only">Register</a>
+                <a href="#" class="nav-link auth-only" style="display: none;" onclick="logout()">Logout</a>
+                <a href="admin.html" class="nav-link admin-only" style="display: none;">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Your Dashboard</h1>
+            <span class="user-welcome" id="user-welcome">Welcome!</span>
+        </div>
+
+        <div class="dashboard-content">
+            <section class="stats-section">
+                <h2 class="section-title">Your Progress</h2>
+                <div class="stats-grid">
+                    <div class="stat-card total">
+                        <div class="stat-value" id="dashboard-total">0</div>
+                        <div class="stat-label">Total Solved</div>
+                    </div>
+                    <div class="stat-card crypto">
+                        <div class="stat-value" id="dashboard-crypto">0</div>
+                        <div class="stat-label">Cryptography</div>
+                    </div>
+                    <div class="stat-card reverse">
+                        <div class="stat-value" id="dashboard-reverse">0</div>
+                        <div class="stat-label">Reverse Engineering</div>
+                    </div>
+                    <div class="stat-card web">
+                        <div class="stat-value" id="dashboard-web">0</div>
+                        <div class="stat-label">Web Exploitation</div>
+                    </div>
+                    <div class="stat-card forensics">
+                        <div class="stat-value" id="dashboard-forensics">0</div>
+                        <div class="stat-label">Forensics</div>
+                    </div>
+                    <div class="stat-card misc">
+                        <div class="stat-value" id="dashboard-misc">0</div>
+                        <div class="stat-label">Binary Exploitation</div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="dashboard-grid">
+                <section class="recent-activity">
+                    <h2 class="section-title">Recent Activity</h2>
+                    <div class="activity-list" id="recent-challenges">
+                        <div class="empty-state" id="no-activity">
+                            <div class="empty-icon">
+                                <i class="fas fa-inbox"></i>
+                            </div>
+                            <div class="empty-text">No challenges solved yet. Start solving challenges to see your activity here!</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="quick-actions">
+                    <h2 class="section-title">Quick Actions</h2>
+                    <div class="action-grid">
+                        <a href="challenges.html#crypto" class="action-card crypto">
+                            <div class="action-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h3>Cryptography</h3>
+                            <p>Start with crypto challenges</p>
+                        </a>
+                        <a href="challenges.html#web" class="action-card web">
+                            <div class="action-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3>Web Exploitation</h3>
+                            <p>Try web challenges</p>
+                        </a>
+                        <a href="challenges.html#reverse" class="action-card reverse">
+                            <div class="action-icon">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <h3>Reverse Engineering</h3>
+                            <p>Analyze binaries</p>
+                        </a>
+                        <a href="challenges.html#forensics" class="action-card forensics">
+                            <div class="action-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>Forensics</h3>
+                            <p>Investigate artifacts</p>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <footer class="footer">
+        <p>DEDSEC CTF Challenge Platform &copy; 2023. All rights reserved.</p>
+        <p>This platform is for educational purposes only.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
