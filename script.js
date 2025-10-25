@@ -2,6 +2,251 @@
 const ADMIN_EMAIL = "admin@dedsec.com";
 const ADMIN_PASSWORD = "admin123";
 
+// CTFd-style Modal Functionality
+let currentChallengeId = null;
+let currentChallengeFlag = null;
+let currentChallengeCategory = null;
+
+function openModal(challengeId) {
+    const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+    const challenge = challenges[challengeId];
+    
+    if (!challenge) return;
+
+    currentChallengeId = challengeId;
+    currentChallengeFlag = challenge.flag;
+    currentChallengeCategory = challenge.category;
+
+    // Populate modal with challenge data
+    document.getElementById('modal-title').textContent = challenge.title;
+    document.getElementById('modal-category').textContent = challenge.category.charAt(0).toUpperCase() + challenge.category.slice(1);
+    document.getElementById('modal-category').className = `challenge-category category-${challenge.category}`;
+    document.getElementById('modal-difficulty').textContent = challenge.difficulty.charAt(0).toUpperCase() + challenge.difficulty.slice(1);
+    document.getElementById('modal-difficulty').className = `challenge-difficulty difficulty-${challenge.difficulty}`;
+    document.getElementById('modal-description-text').textContent = challenge.description;
+    
+    // Calculate and display solves
+    const solvedChallenges = JSON.parse(localStorage.getItem('solvedChallenges')) || {};
+    const solveCount = Object.values(solvedChallenges).filter(s => s.solved).length;
+    document.getElementById('modal-solves').textContent = `${solveCount} solves`;
+    
+    // Handle file link
+    const fileSection = document.getElementById('modal-file-section');
+    const fileLink = document.getElementById('modal-file-link');
+    if (challenge.fileLink) {
+        fileLink.href = challenge.fileLink;
+        fileSection.style.display = 'block';
+    } else {
+        fileSection.style.display = 'none';
+    }
+    
+    // Handle hint
+    const hintSection = document.getElementById('modal-hint-section');
+    const hintContent = document.getElementById('modal-hint-content');
+    if (challenge.hint) {
+        hintContent.textContent = challenge.hint;
+        hintSection.style.display = 'block';
+        // Reset hint state
+        hintContent.classList.remove('revealed');
+        const hintTitle = hintSection.querySelector('.hint-title span');
+        hintTitle.textContent = 'Show Hint';
+    } else {
+        hintSection.style.display = 'none';
+    }
+
+    // Reset form state
+    const form = document.getElementById('modal-flag-form');
+    const input = document.getElementById('modal-flag-input');
+    const button = document.getElementById('modal-submit-btn');
+    input.value = '';
+    input.disabled = false;
+    button.disabled = false;
+    button.textContent = 'Submit Flag';
+
+    // Check if already solved
+    const userSolvedChallenges = JSON.parse(localStorage.getItem('solvedChallenges')) || {};
+    if (userSolvedChallenges[challengeId]) {
+        button.textContent = 'Solved';
+        button.classList.add('solved');
+        button.disabled = true;
+        input.disabled = true;
+    } else {
+        button.classList.remove('solved');
+    }
+
+    // Show modal
+    document.getElementById('challenge-modal').style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById('challenge-modal').style.display = 'none';
+    currentChallengeId = null;
+    currentChallengeFlag = null;
+    currentChallengeCategory = null;
+}
+
+function toggleModalHint() {
+    const hintContent = document.getElementById('modal-hint-content');
+    hintContent.classList.toggle('revealed');
+    
+    const hintTitle = document.querySelector('.modal-hint-section .hint-title span');
+    hintTitle.textContent = hintContent.classList.contains('revealed') ? 'Hide Hint' : 'Show Hint';
+}
+
+function submitModalFlag(event) {
+    event.preventDefault();
+    
+    if (!checkAuth()) {
+        showNotification('Please login to submit flags', 'error');
+        return;
+    }
+    
+    const input = document.getElementById('modal-flag-input');
+    const button = document.getElementById('modal-submit-btn');
+    
+    const userFlag = input.value.trim();
+    
+    if (userFlag === currentChallengeFlag) {
+        // Correct flag
+        showNotification('Correct flag! Challenge solved!', 'success');
+        button.textContent = 'Solved';
+        button.classList.add('solved');
+        button.disabled = true;
+        input.disabled = true;
+        
+        // Save solved challenge
+        saveSolvedChallenge(currentChallengeId, currentChallengeCategory);
+        
+        // Update stats
+        updateStats();
+        
+        // Update the challenge card in the grid
+        updateChallengeCardUI(currentChallengeId);
+        
+        // Close modal after successful submission
+        setTimeout(() => {
+            closeModal();
+        }, 1500);
+        
+    } else {
+        // Incorrect flag
+        showNotification('Incorrect flag. Try again!', 'error');
+        input.value = '';
+        input.focus();
+    }
+}
+
+function updateChallengeCardUI(challengeId) {
+    const challengeElement = document.getElementById(challengeId);
+    if (challengeElement) {
+        challengeElement.classList.add('solved');
+        const status = challengeElement.querySelector('.challenge-status');
+        if (status) {
+            status.textContent = 'Solved';
+            status.classList.remove('status-unsolved');
+            status.classList.add('status-solved');
+        }
+    }
+}
+
+// Enhanced loadChallenges function for modal approach
+function loadChallenges() {
+    const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+    
+    // If no challenges in localStorage, use the hardcoded ones as fallback
+    if (Object.keys(challenges).length === 0) {
+        initializeDefaultChallenges();
+        return;
+    }
+    
+    // Clear existing challenge grids
+    document.querySelectorAll('.challenge-grid').forEach(grid => {
+        grid.innerHTML = '';
+    });
+    
+    // Add each challenge to the appropriate category
+    for (const [challengeId, challenge] of Object.entries(challenges)) {
+        const challengeCard = document.createElement('div');
+        challengeCard.className = `challenge-card ${challenge.category}-challenge`;
+        challengeCard.id = challengeId;
+        challengeCard.onclick = () => openModal(challengeId);
+        
+        // Check if solved
+        const solvedChallenges = JSON.parse(localStorage.getItem('solvedChallenges')) || {};
+        if (solvedChallenges[challengeId]) {
+            challengeCard.classList.add('solved');
+        }
+        
+        challengeCard.innerHTML = `
+            <div class="challenge-header">
+                <div>
+                    <h3 class="challenge-title">${challenge.title}</h3>
+                    <span class="challenge-difficulty difficulty-${challenge.difficulty}">
+                        ${challenge.difficulty.charAt(0).toUpperCase() + challenge.difficulty.slice(1)}
+                    </span>
+                </div>
+                <span class="challenge-points">${getPointsByDifficulty(challenge.difficulty)} pts</span>
+            </div>
+            <p class="challenge-description">${challenge.description.substring(0, 100)}${challenge.description.length > 100 ? '...' : ''}</p>
+            <div class="challenge-meta">
+                ${challenge.fileLink ? `
+                <div class="challenge-file-indicator">
+                    <i class="fas fa-paperclip"></i> File attached
+                </div>` : ''}
+                ${challenge.hint ? `
+                <div class="challenge-hint-indicator">
+                    <i class="fas fa-lightbulb"></i> Hint available
+                </div>` : ''}
+            </div>
+            <div class="challenge-info">
+                <span class="challenge-status ${solvedChallenges[challengeId] ? 'status-solved' : 'status-unsolved'}">
+                    ${solvedChallenges[challengeId] ? 'Solved' : 'Unsolved'}
+                </span>
+                <span class="challenge-creator">By ${challenge.creator}</span>
+            </div>
+        `;
+        
+        // Add to the appropriate category grid
+        const categoryGrid = document.getElementById(`${challenge.category}-challenges`);
+        if (categoryGrid) {
+            categoryGrid.appendChild(challengeCard);
+        }
+    }
+}
+
+function getPointsByDifficulty(difficulty) {
+    const points = {
+        'easy': 100,
+        'medium': 200,
+        'hard': 300
+    };
+    return points[difficulty] || 100;
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('challenge-modal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+// Enhanced initialization
+document.addEventListener('DOMContentLoaded', function() {
+    updateAuthUI();
+    setupCategoryNavigation();
+    
+    // Load challenges when the page loads
+    if (document.querySelector('.challenge-grid')) {
+        const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+        if (Object.keys(challenges).length === 0) {
+            initializeDefaultChallenges();
+        } else {
+            loadChallenges();
+        }
+    }
+});
+
 // Check if user is logged in
 function checkAuth() {
     return localStorage.getItem('userLoggedIn') === 'true';

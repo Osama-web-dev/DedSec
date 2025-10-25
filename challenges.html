@@ -16,12 +16,13 @@
             </a>
             <nav class="nav">
                 <a href="index.html" class="nav-link">Home</a>
-                <a href="challenges.html" class="nav-link">Challenges</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="challenges.html" class="nav-link active">Challenges</a>
                 <a href="help.html" class="nav-link">Help</a>
-                <a href="login.html" class="nav-link" id="login-nav">Login</a>
-                <a href="register.html" class="nav-link" id="register-nav">Register</a>
-                <a href="#" class="nav-link" id="logout-nav" style="display: none;" onclick="logout()">Logout</a>
-                <a href="admin.html" class="nav-link" id="admin-nav" style="display: none;">Admin</a>
+                <a href="login.html" class="nav-link guest-only">Login</a>
+                <a href="register.html" class="nav-link guest-only">Register</a>
+                <a href="#" class="nav-link auth-only" style="display: none;" onclick="logout()">Logout</a>
+                <a href="admin.html" class="nav-link admin-only" style="display: none;">Admin</a>
             </nav>
         </div>
     </header>
@@ -150,6 +151,46 @@
         </div>
     </main>
 
+    <!-- Challenge Modal -->
+    <div id="challenge-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Challenge Title</h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-meta">
+                    <span id="modal-category" class="challenge-category">Category</span>
+                    <span id="modal-difficulty" class="challenge-difficulty">Difficulty</span>
+                </div>
+                <div class="modal-description">
+                    <p id="modal-description-text">Challenge description will appear here.</p>
+                </div>
+                <div id="modal-file-section" class="modal-file-section" style="display: none;">
+                    <h4>Files</h4>
+                    <a id="modal-file-link" href="#" target="_blank" class="download-link">
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                </div>
+                <div id="modal-hint-section" class="modal-hint-section" style="display: none;">
+                    <div class="hint-revealer" onclick="toggleModalHint()">
+                        <div class="hint-title">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Show Hint</span>
+                        </div>
+                        <div class="hint-content" id="modal-hint-content"></div>
+                    </div>
+                </div>
+                <div class="modal-submission">
+                    <form id="modal-flag-form" onsubmit="submitModalFlag(event)">
+                        <input type="text" id="modal-flag-input" class="flag-input" placeholder="Enter flag: dedSEC{...}" required>
+                        <button type="submit" class="submit-btn" id="modal-submit-btn">Submit Flag</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="notification" class="notification"></div>
 
     <footer class="footer">
@@ -159,5 +200,221 @@
 
     <script src="auth.js"></script>
     <script src="script.js"></script>
+    <script>
+        // Modal functionality
+        let currentChallengeId = null;
+        let currentChallengeFlag = null;
+        let currentChallengeCategory = null;
+
+        function openModal(challengeId) {
+            const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+            const challenge = challenges[challengeId];
+            
+            if (!challenge) return;
+
+            currentChallengeId = challengeId;
+            currentChallengeFlag = challenge.flag;
+            currentChallengeCategory = challenge.category;
+
+            // Populate modal with challenge data
+            document.getElementById('modal-title').textContent = challenge.title;
+            document.getElementById('modal-category').textContent = challenge.category.charAt(0).toUpperCase() + challenge.category.slice(1);
+            document.getElementById('modal-category').className = `challenge-category category-${challenge.category}`;
+            document.getElementById('modal-difficulty').textContent = challenge.difficulty.charAt(0).toUpperCase() + challenge.difficulty.slice(1);
+            document.getElementById('modal-difficulty').className = `challenge-difficulty difficulty-${challenge.difficulty}`;
+            document.getElementById('modal-description-text').textContent = challenge.description;
+            
+            // Handle file link
+            const fileSection = document.getElementById('modal-file-section');
+            const fileLink = document.getElementById('modal-file-link');
+            if (challenge.fileLink) {
+                fileLink.href = challenge.fileLink;
+                fileSection.style.display = 'block';
+            } else {
+                fileSection.style.display = 'none';
+            }
+            
+            // Handle hint
+            const hintSection = document.getElementById('modal-hint-section');
+            const hintContent = document.getElementById('modal-hint-content');
+            if (challenge.hint) {
+                hintContent.textContent = challenge.hint;
+                hintSection.style.display = 'block';
+                // Reset hint state
+                hintContent.classList.remove('revealed');
+                const hintTitle = hintSection.querySelector('.hint-title span');
+                hintTitle.textContent = 'Show Hint';
+            } else {
+                hintSection.style.display = 'none';
+            }
+
+            // Reset form state
+            const form = document.getElementById('modal-flag-form');
+            const input = document.getElementById('modal-flag-input');
+            const button = document.getElementById('modal-submit-btn');
+            input.value = '';
+            input.disabled = false;
+            button.disabled = false;
+            button.textContent = 'Submit Flag';
+
+            // Check if already solved
+            const solvedChallenges = JSON.parse(localStorage.getItem('solvedChallenges')) || {};
+            if (solvedChallenges[challengeId]) {
+                button.textContent = 'Solved';
+                button.classList.add('solved');
+                button.disabled = true;
+                input.disabled = true;
+            } else {
+                button.classList.remove('solved');
+            }
+
+            // Show modal
+            document.getElementById('challenge-modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('challenge-modal').style.display = 'none';
+            currentChallengeId = null;
+            currentChallengeFlag = null;
+            currentChallengeCategory = null;
+        }
+
+        function toggleModalHint() {
+            const hintContent = document.getElementById('modal-hint-content');
+            hintContent.classList.toggle('revealed');
+            
+            const hintTitle = document.querySelector('.modal-hint-section .hint-title span');
+            hintTitle.textContent = hintContent.classList.contains('revealed') ? 'Hide Hint' : 'Show Hint';
+        }
+
+        function submitModalFlag(event) {
+            event.preventDefault();
+            
+            if (!checkAuth()) {
+                showNotification('Please login to submit flags', 'error');
+                return;
+            }
+            
+            const input = document.getElementById('modal-flag-input');
+            const button = document.getElementById('modal-submit-btn');
+            
+            const userFlag = input.value.trim();
+            
+            if (userFlag === currentChallengeFlag) {
+                // Correct flag
+                showNotification('Correct flag! Challenge solved!', 'success');
+                button.textContent = 'Solved';
+                button.classList.add('solved');
+                button.disabled = true;
+                input.disabled = true;
+                
+                // Save solved challenge
+                saveSolvedChallenge(currentChallengeId, currentChallengeCategory);
+                
+                // Update stats
+                updateStats();
+                
+                // Update the challenge card in the grid
+                updateChallengeCardUI(currentChallengeId);
+                
+            } else {
+                // Incorrect flag
+                showNotification('Incorrect flag. Try again!', 'error');
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function updateChallengeCardUI(challengeId) {
+            const challengeElement = document.getElementById(challengeId);
+            if (challengeElement) {
+                const status = challengeElement.querySelector('.challenge-status');
+                if (status) {
+                    status.textContent = 'Solved';
+                    status.classList.remove('status-unsolved');
+                    status.classList.add('status-solved');
+                }
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('challenge-modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Override the loadChallenges function to use modal approach
+        const originalLoadChallenges = window.loadChallenges;
+        window.loadChallenges = function() {
+            const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+            
+            // If no challenges in localStorage, use the hardcoded ones as fallback
+            if (Object.keys(challenges).length === 0) {
+                initializeDefaultChallenges();
+                return;
+            }
+            
+            // Clear existing challenge grids
+            document.querySelectorAll('.challenge-grid').forEach(grid => {
+                grid.innerHTML = '';
+            });
+            
+            // Add each challenge to the appropriate category
+            for (const [challengeId, challenge] of Object.entries(challenges)) {
+                const challengeCard = document.createElement('div');
+                challengeCard.className = `challenge-card ${challenge.category}-challenge`;
+                challengeCard.id = challengeId;
+                challengeCard.onclick = () => openModal(challengeId);
+                
+                challengeCard.innerHTML = `
+                    <div class="challenge-header">
+                        <div>
+                            <h3 class="challenge-title">${challenge.title}</h3>
+                            <span class="challenge-difficulty difficulty-${challenge.difficulty}">
+                                ${challenge.difficulty.charAt(0).toUpperCase() + challenge.difficulty.slice(1)}
+                            </span>
+                        </div>
+                        <span class="challenge-status status-unsolved">Unsolved</span>
+                    </div>
+                    <p class="challenge-description">${challenge.description.substring(0, 100)}${challenge.description.length > 100 ? '...' : ''}</p>
+                    ${challenge.fileLink ? `
+                    <div class="challenge-file-indicator">
+                        <i class="fas fa-paperclip"></i> File attached
+                    </div>` : ''}
+                    ${challenge.hint ? `
+                    <div class="challenge-hint-indicator">
+                        <i class="fas fa-lightbulb"></i> Hint available
+                    </div>` : ''}
+                `;
+                
+                // Add to the appropriate category grid
+                const categoryGrid = document.getElementById(`${challenge.category}-challenges`);
+                if (categoryGrid) {
+                    categoryGrid.appendChild(challengeCard);
+                }
+            }
+            
+            // Load solved challenges to update UI
+            loadSolvedChallenges();
+        };
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+            setupCategoryNavigation();
+            
+            // Load challenges when the page loads
+            if (document.querySelector('.challenge-grid')) {
+                const challenges = JSON.parse(localStorage.getItem('challenges')) || {};
+                if (Object.keys(challenges).length === 0) {
+                    initializeDefaultChallenges();
+                } else {
+                    loadChallenges();
+                }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -54,6 +54,49 @@ function updateAuthUI() {
     }
 }
 
+// Enhanced Persistent Authentication
+function initializeAuth() {
+    // Check if user should stay logged in
+    const stayLoggedIn = localStorage.getItem('stayLoggedIn') === 'true';
+    const loginExpiry = localStorage.getItem('loginExpiry');
+    
+    if (stayLoggedIn && loginExpiry && new Date().getTime() < parseInt(loginExpiry)) {
+        // User is still within login session
+        localStorage.setItem('userLoggedIn', 'true');
+    } else if (stayLoggedIn) {
+        // Session expired
+        localStorage.removeItem('userLoggedIn');
+        localStorage.removeItem('stayLoggedIn');
+        localStorage.removeItem('loginExpiry');
+    }
+    
+    updateAuthUI();
+}
+
+function loginUser(email, password, rememberMe = false) {
+    // ... existing login logic ...
+    
+    if (rememberMe) {
+        localStorage.setItem('stayLoggedIn', 'true');
+        // Set expiry for 7 days
+        const expiryTime = new Date().getTime() + (7 * 24 * 60 * 60 * 1000);
+        localStorage.setItem('loginExpiry', expiryTime.toString());
+    }
+    
+    localStorage.setItem('userLoggedIn', 'true');
+    // ... rest of login logic
+}
+
+// Update DOMContentLoaded event
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAuth();
+    updateAuthUI();
+    
+    if (window.location.pathname.includes('challenges.html')) {
+        setupCategoryNavigation();
+    }
+});
+
 // Logout function
 function logout() {
     localStorage.removeItem('userLoggedIn');
